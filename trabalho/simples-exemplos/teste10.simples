@@ -1,0 +1,12 @@
+programa teste10
+inteiro rogers cabral
+func inteiro funcaoteste(inteiro a inteiro b)
+inicio
+   
+fimfunc
+
+inicio
+   
+funcaoteste(90 96)   
+
+fimprograma
