@@ -1,0 +1,13 @@
+programa teste10
+inteiro r c
+func inteiro ftest(inteiro a inteiro b)
+inicio
+   retorne a * b
+fimfunc
+
+inicio
+leia r 
+leia c
+escreva ftest(r c)   
+
+fimprograma
