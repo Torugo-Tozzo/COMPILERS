@@ -7,6 +7,7 @@
 int contaVar;  //conta numero de variaveis
 int rotulo = 0; //marca lugares no codigo
 int pos_funcao = 0;
+int escopo = GLO;
 int tipo;
 %}
 
@@ -58,10 +59,13 @@ int tipo;
 
 programa 
     : cabecalho 
-        {contaVar = 0;}
+        {
+            contaVar = 0;
+            escopo = GLO;    
+        }
       variaveis 
         { 
-            //mostraTabela();
+            escopo = LOC;
             empilha(contaVar);
             if(contaVar){
                fprintf(yyout,"\tAMEM\t%d\n", contaVar); 
@@ -112,7 +116,8 @@ lista_variaveis
            strcpy(elemTab.id, atomo);
            elemTab.end = contaVar;
            elemTab.tip = tipo;
-           //elemTab.esc = escopo
+           elemTab.cat = VAR;
+           elemTab.exc = escopo;
            insereSimbolo(elemTab);
            contaVar++;
          }
@@ -121,31 +126,45 @@ lista_variaveis
            strcpy(elemTab.id, atomo);
            elemTab.end = contaVar;
            elemTab.tip = tipo;
-           //elemTab.exc = escopo;
+           elemTab.cat = VAR;
+           elemTab.exc = escopo;
            insereSimbolo(elemTab);
            contaVar++;      
         }
     ;
 //regras para funcoes ("rotina" no slide)
 funcoes
-    : 
-    | funcao funcoes
+    :
+    |   {
+            fprintf(yyout,"\tDSVS\tL0\n"); 
+            rotulo++;
+        }
+        declaracao_funcoes
+        {
+            fprintf(yyout,"L0\tNADA\t\n");
+        }
+    ;
+
+declaracao_funcoes
+    : funcao declaracao_funcoes
+    | funcao
     ;
 
 funcao
     : T_FUNC tipo T_IDENTIF {
+        fprintf(yyout,"L%d\tNADA\n", rotulo);
         strcpy(elemTab.id, atomo);
         elemTab.end = contaVar;
         elemTab.tip = tipo;
-        elemTab.cat = 0;
-        elemTab.rot = rotulo++;
+        elemTab.cat = FUN;
+        elemTab.exc = GLO;
+        elemTab.rot = rotulo;
         insereSimbolo(elemTab);
         pos_funcao = contaVar;
+        rotulo++;
         contaVar++;
     } T_ABRE parametros T_FECHA
-      variaveis T_INICIO lista_comandos T_FIMFUNC {
-        pos_funcao = -1;
-      }
+      variaveis T_INICIO lista_comandos T_FIMFUNC
     ;
 
     parametros
@@ -158,11 +177,11 @@ funcao
         strcpy(elemTab.id, atomo);
         elemTab.end = contaVar;
         elemTab.tip = tipo;
-        elemTab.cat = 1;
+        elemTab.cat = PAR;
+        elemTab.exc = LOC;
         insereSimbolo(elemTab);
         tabSimb[pos_funcao].par[tabSimb[pos_funcao].npa] = tipo;
         tabSimb[pos_funcao].npa++;
-        pos_funcao = contaVar;
         contaVar++;
     }
     ;
@@ -181,12 +200,21 @@ comando
     //| chamada_procedimento
     ;
 
+chamada
+    :
+    | T_ABRE lista_argumentos T_FECHA
+    ;
+
+lista_argumentos
+    :
+    | expressao lista_argumentos
+    ;
+
 retorno
     : T_RETORNE expressao
         // deve gerar (depois da trad.  da expressao)
         // ARZL (valor de retorno), DMEM (se tiver variavel local)
         // RTSP n
-        // utilizar a regrinha se então senão 
         //RTSP qnts parametros
     ;
 
@@ -331,19 +359,13 @@ identificador
     : T_IDENTIF
         {
             int pos = buscaSimbolo(atomo);
-            fprintf(yyout,"\tCRVG\t%d\n", tabSimb[pos].end); 
+            int exc = tabSimb[pos].exc;
+            if(exc == GLO)
+                fprintf(yyout,"\tCRVG\t%d\n", tabSimb[pos].end); 
+            else 
+                fprintf(yyout,"\tCRVL\t%d\n", tabSimb[pos].end); 
             empilha(tabSimb[pos].tip);
         }  
-    ;
-
-chamada
-    :
-    |T_ABRE lista_argumentos T_FECHA
-    ;
-
-lista_argumentos
-    :
-    | expressao lista_argumentos
     ;
 
 termo

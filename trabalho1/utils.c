@@ -3,6 +3,8 @@
 #define TAM_TAB 100
 #define MAXPAR 20
 enum {INT, LOG};
+enum {FUN, PAR, VAR};
+enum {GLO, LOC};
 
 //#include <string.h>
 
@@ -47,6 +49,13 @@ void insereSimbolo (struct elemTabSimbolos elem){
     //maiuscula(elem.id);
     if(posTab == TAM_TAB)
         yyerror("Tabela de Simbolos Cheia!");
+    
+    /*
+        Msm nome -> 
+            strcmp(tabSimb[i].id,elem.id)
+        Função ou variável 
+            tabSimb[i].cat == elem.cat
+    */
     for (i = posTab - 1; strcmp(tabSimb[i].id,elem.id) && i >= 0; i--);
     //i = buscaSimbolo(elem.id);
     if( i != -1)
@@ -70,11 +79,19 @@ void insereSimbolo (struct elemTabSimbolos elem){
 void mostraTabela(){
     puts("Tabela de Simbolos");
     puts("------------------");
-    printf("\n%30s | %s | %s \n", "ID", "END", "TIP");
+    printf("\n%30s | %s | %s | %s | %s | %s | %s \n", "ID", "END", "TIP", "CAT", "EXC", "ROT", "NPA");
     for(int i = 0; i < 50; i++)
         printf("-");
     for(int i = 0; i < posTab; i++)
-        printf("\n%30s | %3d | %s", tabSimb[i].id, tabSimb[i].end, tabSimb[i].tip == INT? "INT" : "LOG");
+        printf("\n%30s | %3d | %s | %s | %s | L%-3d | %d", 
+        tabSimb[i].id,
+        tabSimb[i].end,
+        tabSimb[i].tip == INT? "INT" : "LOG", 
+        tabSimb[i].cat == VAR? "VAR" : tabSimb[i].cat == PAR ? "PAR" : "FUN", 
+        tabSimb[i].exc == GLO? "GLO" : "LOC",
+        tabSimb[i].cat == FUN? tabSimb[i].rot: -1,
+        tabSimb[i].npa
+        );
     printf("\n");
 }
 

@@ -1,13 +1,17 @@
 programa teste10
 inteiro r c
-func inteiro ftest(inteiro a inteiro b)
+func inteiro f1test(inteiro a inteiro b inteiro t)
+   inteiro k
 inicio
-   retorne a * b
+   retorne a + b
+fimfunc
+
+func inteiro f2test(inteiro h inteiro j)
+inicio
+   retorne h + j
 fimfunc
 
 inicio
 leia r 
 leia c
-escreva ftest(r c)   
-
 fimprograma
