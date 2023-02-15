@@ -1,17 +1,23 @@
 programa teste10
 inteiro r c
-func inteiro f1test(inteiro a inteiro b inteiro t)
+logico w
+
+func inteiro f1test(inteiro a inteiro b)
    inteiro k
+inicio
+   retorne 1 + 2
+fimfunc
+
+func inteiro f2test(inteiro a inteiro b)
 inicio
    retorne a + b
 fimfunc
 
-func inteiro f2test(inteiro h inteiro j)
-inicio
-   retorne h + j
+func logico f3test(inteiro a inteiro b)
+inicio   
+   retorne V
 fimfunc
 
 inicio
-leia r 
-leia c
+   escreva f1test(f2test(10 30) 20)
 fimprograma
