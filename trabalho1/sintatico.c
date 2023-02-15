@@ -1326,6 +1326,7 @@ yyreduce:
   case 20: /* $@5: %empty  */
 #line 154 "sintatico.y"
                             {
+        fprintf(yyout,"L%d\tNADA\n", rotulo);
         strcpy(elemTab.id, atomo);
         elemTab.end = contaVar;
         elemTab.tip = tipo;
@@ -1333,7 +1334,6 @@ yyreduce:
         elemTab.exc = GLO;
         elemTab.rot = rotulo;
         insereSimbolo(elemTab);
-        fprintf(yyout,"L%d\tNADA\n", rotulo);
         pos_funcao = contaVar;
         rotulo++;
         contaVar++;
