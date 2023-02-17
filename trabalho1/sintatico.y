@@ -70,14 +70,8 @@ programa
       variaveis 
         { 
             escopo = LOC;
-            empilha(pilha, contaVar);
-            if(contaVar){
-               fprintf(yyout,"\tAMEM\t%d\n", contaVar); 
-            }
         }
       //acrescentar as rotinas do slide:
-
-
       funcoes
         {
             mostraTabela();
@@ -93,13 +87,20 @@ programa
 
 cabecalho
     : T_PROGRAMA T_IDENTIF
-        {fprintf(yyout,"\tINPP\n"); }
+        { fprintf(yyout,"\tINPP\n"); }
     ;
 
 
 variaveis
-    : /* vazio */
-    | declaracao_variaveis
+    : { empilha(pilha, contaVar); }
+    | { empilha(pilha, contaVar); }
+    declaracao_variaveis
+    {
+        int var = contaVar - desempilha(pilha);
+        if(var)
+               fprintf(yyout,"\tAMEM\t%d\n", var); 
+        empilha(pilha,var);
+    }
     ;
 
 declaracao_variaveis
@@ -168,8 +169,11 @@ funcao
         insereSimbolo(elemTab);
         pos_funcao = contaVar;
         contaVar++;
-    } T_ABRE parametros T_FECHA
-      variaveis T_INICIO lista_comandos T_FIMFUNC {rotulo++;}
+    }
+    T_ABRE parametros T_FECHA variaveis T_INICIO lista_comandos T_FIMFUNC
+    {
+        rotulo++;
+    }
     ;
 
     parametros
@@ -203,11 +207,20 @@ comando
     | selecao
     | atribuicao
     | retorno
-    //| chamada_procedimento
     ;
 
 retorno
-    : T_RETORNE expressao 
+    : T_RETORNE expressao {
+        int tipo = desempilha(pilha);
+        if(tipo != tabSimb[pos_funcao].tip)
+            yyerror("Incompatilidade de tipo");
+        int npa = tabSimb[pos_funcao].npa;
+        int varFuncao = desempilha(pilha);
+        fprintf(yyout,"\tARZL\t%d\n", -1 * (npa + 3)); 
+        if(varFuncao > 0)
+            fprintf(yyout,"\tDMEM\t%d\n", varFuncao); 
+        fprintf(yyout,"\tRTSP\t%d\n", npa);
+    }
         // deve gerar (depois da trad.  da expressao)
         // ARZL (valor de retorno), DMEM (se tiver variavel local)
         // RTSP n
@@ -356,6 +369,7 @@ chamada
     | T_ABRE lista_argumentos 
     {
         int pos = desempilha(pilha_func);
+        empilha(pilha_func, pos);
         fprintf(yyout,"\tSVCP\n");
         fprintf(yyout,"\tDSVS\tL%d\n",tabSimb[pos].rot);
     }
@@ -381,8 +395,11 @@ identificador
                 int exc = tabSimb[pos].exc;
                 if(exc == GLO)
                     fprintf(yyout,"\tCRVG\t%d\n", tabSimb[pos].end); 
-                else 
-                    fprintf(yyout,"\tCRVL\t%d\n", tabSimb[pos].end); 
+                else  {
+                    int pos_param = tabSimb[pos].end - tabSimb[pos_funcao].end;
+                    int end = (tabSimb[pos_funcao].npa - pos_param + 3) * -1;
+                    fprintf(yyout,"\tCRVL\t%d\n", end);
+                }
             }
             empilha(pilha, tabSimb[pos].tip);
         }  
