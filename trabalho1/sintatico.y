@@ -79,7 +79,7 @@ programa
       T_INICIO lista_comandos T_FIM
         { 
             int conta = desempilha(pilha);
-            if (conta)
+            if (conta > 0)
                fprintf(yyout,"\tDMEM\t%d\n", conta); 
             fprintf(yyout, "\tFIMP\n");    
         }
@@ -215,16 +215,12 @@ retorno
         if(tipo != tabSimb[pos_funcao].tip)
             yyerror("Incompatilidade de tipo");
         int npa = tabSimb[pos_funcao].npa;
-        int varFuncao = desempilha(pilha);
+        int varFuncao = contaVar - (pos_funcao + 1) - npa;
         fprintf(yyout,"\tARZL\t%d\n", -1 * (npa + 3)); 
         if(varFuncao > 0)
             fprintf(yyout,"\tDMEM\t%d\n", varFuncao); 
         fprintf(yyout,"\tRTSP\t%d\n", npa);
     }
-        // deve gerar (depois da trad.  da expressao)
-        // ARZL (valor de retorno), DMEM (se tiver variavel local)
-        // RTSP n
-        //RTSP qnts parametros
     ;
 
 entrada_saida
@@ -307,7 +303,13 @@ atribuicao
             int pos = desempilha(pilha);
             if (tabSimb[pos].tip != tip)
                yyerror("Incompatibilidade de tipo!");
-            fprintf(yyout,"\tARZG\t%d\n", tabSimb[pos].end); 
+            if(tabSimb[pos].exc == GLO)
+                fprintf(yyout,"\tARZG\t%d\n", tabSimb[pos].end);
+            else {
+                int pos_var = tabSimb[pos].end - tabSimb[pos_funcao].end - 1;
+                int end = pos_var - tabSimb[pos_funcao].npa;
+                fprintf(yyout,"\tARZL\t%d\n", end); 
+            }
         }
     ;
 
@@ -369,6 +371,12 @@ chamada
     | T_ABRE lista_argumentos 
     {
         int pos = desempilha(pilha_func);
+        int npa = tabSimb[pos].npa;
+        for(int i = npa - 1; i > 0; i--){
+            int tipo = desempilha(pilha);
+            if(tipo != tabSimb[pos].par[i])
+                yyerror ("Incompatibilidade de tipo!");
+        }
         empilha(pilha_func, pos);
         fprintf(yyout,"\tSVCP\n");
         fprintf(yyout,"\tDSVS\tL%d\n",tabSimb[pos].rot);
@@ -396,8 +404,11 @@ identificador
                 if(exc == GLO)
                     fprintf(yyout,"\tCRVG\t%d\n", tabSimb[pos].end); 
                 else  {
-                    int pos_param = tabSimb[pos].end - tabSimb[pos_funcao].end;
-                    int end = (tabSimb[pos_funcao].npa - pos_param + 3) * -1;
+                    int pos_param = tabSimb[pos].end - tabSimb[pos_funcao].end - 1;
+                    int end = (pos_param - tabSimb[pos_funcao].npa);
+                    if(tabSimb[pos].cat == PAR){
+                        end -= 2;
+                    }
                     fprintf(yyout,"\tCRVL\t%d\n", end);
                 }
             }
