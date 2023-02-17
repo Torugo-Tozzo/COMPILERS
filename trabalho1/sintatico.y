@@ -308,6 +308,8 @@ atribuicao
             else {
                 int pos_var = tabSimb[pos].end - tabSimb[pos_funcao].end - 1;
                 int end = pos_var - tabSimb[pos_funcao].npa;
+                if(tabSimb[pos].cat == PAR)
+                    end-=2;
                 fprintf(yyout,"\tARZL\t%d\n", end); 
             }
         }
@@ -406,9 +408,8 @@ identificador
                 else  {
                     int pos_param = tabSimb[pos].end - tabSimb[pos_funcao].end - 1;
                     int end = (pos_param - tabSimb[pos_funcao].npa);
-                    if(tabSimb[pos].cat == PAR){
+                    if(tabSimb[pos].cat == PAR)
                         end -= 2;
-                    }
                     fprintf(yyout,"\tCRVL\t%d\n", end);
                 }
             }
