@@ -86,8 +86,7 @@ void insereSimbolo(struct elemTabSimbolos elem)
     i = posTab - 1;
     while (i >= 0)
     {
-        if (!strcmp(tabSimb[i].id, elem.id))
-            if(!(elem.cat == PAR && tabSimb[i].cat == PAR && elem.rot != tabSimb[i].rot))
+        if (!strcmp(tabSimb[i].id, elem.id) && elem.rot == tabSimb[i].rot)
                 i = -1;
         i--;
     }

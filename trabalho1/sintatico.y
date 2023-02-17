@@ -5,6 +5,7 @@
 #include "lexico.c"
 #include "utils.c"
 int contaVar;  //conta numero de variaveis
+int contaVarGlobal;
 int rotulo = 0; //marca lugares no codigo
 int pos_funcao = 0;
 int escopo = GLO;
@@ -69,18 +70,19 @@ programa
         }
       variaveis 
         { 
+            contaVarGlobal = desempilha(pilha);
             escopo = LOC;
         }
       //acrescentar as rotinas do slide:
       funcoes
         {
+            escopo = GLO;
             mostraTabela();
         }
       T_INICIO lista_comandos T_FIM
         { 
-            int conta = desempilha(pilha);
-            if (conta > 0)
-               fprintf(yyout,"\tDMEM\t%d\n", conta); 
+            if (contaVarGlobal > 0)
+               fprintf(yyout,"\tDMEM\t%d\n", contaVarGlobal); 
             fprintf(yyout, "\tFIMP\n");    
         }
     ;
@@ -89,7 +91,6 @@ cabecalho
     : T_PROGRAMA T_IDENTIF
         { fprintf(yyout,"\tINPP\n"); }
     ;
-
 
 variaveis
     : { empilha(pilha, contaVar); }
@@ -211,6 +212,8 @@ comando
 
 retorno
     : T_RETORNE expressao {
+        if(escopo == GLO)
+            yyerror("Comando retorne no código principal");
         int tipo = desempilha(pilha);
         if(tipo != tabSimb[pos_funcao].tip)
             yyerror("Incompatilidade de tipo");
@@ -379,7 +382,6 @@ chamada
             if(tipo != tabSimb[pos].par[i])
                 yyerror ("Incompatibilidade de tipo!");
         }
-        empilha(pilha_func, pos);
         fprintf(yyout,"\tSVCP\n");
         fprintf(yyout,"\tDSVS\tL%d\n",tabSimb[pos].rot);
     }
