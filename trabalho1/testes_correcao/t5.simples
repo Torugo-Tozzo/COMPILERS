@@ -1,5 +1,6 @@
 programa teste5
    inteiro x
+   
    func inteiro foo (inteiro a inteiro b)
    inteiro conta
    inicio 
@@ -10,6 +11,7 @@ programa teste5
       fimenquanto
       retorne a 
     fimfunc
+    
     func inteiro baa (inteiro a)
     inicio  
         retorne a + 1

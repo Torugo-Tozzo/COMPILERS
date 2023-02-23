@@ -5,3 +5,18 @@ simples:	lexico.l sintatico.y utils.c;
 
 limpa: ;
 			rm lexico.c sintatico.c sintatico.h sintatico.output simples
+
+teste-todos: ;
+			./simples testes_correcao/t1.simples;
+			./simples testes_correcao/t2.simples;
+			./simples testes_correcao/t3.simples;
+			./simples testes_correcao/t4.simples;
+			./simples testes_correcao/t5.simples;
+			./simples testes_correcao/t6.simples;
+			./simples testes_correcao/t7.simples;
+			./simples testes_correcao/t8.simples;
+
+teste: simples testes_correcao/t1.simples;
+	make limpa;
+	make;
+	./simples testes_correcao/t1.simples;
